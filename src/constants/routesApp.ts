@@ -1,17 +1,3 @@
 export const routesApp = {
   home: "/",
-  campaigns: "/campaigns",
-  clubs: "/cashtags",
-  badgesOverview: "/badges/overview",
-  advertisers: "/advertisers",
-  dashboard: "/dashboard",
-  createBounty: "/bounties/create",
-  info: "/info",
-  leaderboard: "/creators/leaderboard",
-  referrals: "/referrals",
-  points: "/points",
-  createBadge: "/badges/create",
-  plugins: "/plugins",
-  hooks: "/hooks",
-  stake: "/studio/stake",
 };

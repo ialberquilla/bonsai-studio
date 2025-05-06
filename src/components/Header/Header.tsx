@@ -14,7 +14,7 @@ import { Balance } from "./Balance";
 
 const headerLinks = [
   {
-    label: "Feed",
+    label: "Your Posts",
     href: "/",
   },
   {
