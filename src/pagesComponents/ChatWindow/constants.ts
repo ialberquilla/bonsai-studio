@@ -1,0 +1,3 @@
+export const BONSAI_TOKEN_BASE = "0x474f4cb764df9da079D94052fED39625c147C12C"; // base
+
+export const PROMOTE_TOKEN_COST = 500;
