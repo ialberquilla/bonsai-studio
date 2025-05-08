@@ -9,16 +9,82 @@ import { Header2, Subtitle } from "@src/styles/text";
 import ImportTemplatesModal from "@pagesComponents/Studio/ImportTemplatesModal";
 import { brandFont } from "@src/fonts/fonts";
 import clsx from "clsx";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance, useReadContract, useWalletClient } from "wagmi";
+import { LENS_CHAIN_ID, lensTestnet, PROTOCOL_DEPLOYMENT } from "@src/services/madfi/utils";
+import { erc20Abi, parseEther } from "viem";
+import toast from "react-hot-toast";
+import { publicClient } from "@src/services/madfi/moneyClubs";
+import { switchChain } from "viem/actions";
+
+const BONSAI_ABI = [
+  {
+    type: "function",
+    name: "mint",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+] as const;
 
 const StudioCreatePage: NextPage = () => {
   const router = useRouter();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
+  const { data: walletClient } = useWalletClient();
   const importButtonRef = useRef<HTMLButtonElement>(null);
   const [showImportTemplateModal, setShowImportTemplateModal] = useState(false);
   const [importedTemplateURL, setImportedTemplateURL] = useState<string | undefined>();
   const { data: registeredTemplates, isLoading } = useRegisteredTemplates(importedTemplateURL);
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | undefined>();
+  const [isMinting, setIsMinting] = useState(false);
+
+  const { data: bonsaiBalance } = useReadContract({
+    address: PROTOCOL_DEPLOYMENT.lens.Bonsai as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [address!],
+    chainId: lensTestnet.id,
+    query: {
+      enabled: isConnected && address,
+      refetchInterval: 10000,
+    },
+  });
+
+  const handleMintBonsai = async () => {
+    if (!walletClient || !address) return;
+
+    if (lensTestnet.id !== chain?.id && walletClient) {
+      try {
+        await switchChain(walletClient, { id: lensTestnet.id });
+      } catch (error) {
+        console.log(error);
+        toast.error("Please switch networks to comment");
+        return;
+      }
+    }
+
+    try {
+      setIsMinting(true);
+      const toastId = toast.loading("Minting Bonsai tokens...");
+
+      const hash = await walletClient.writeContract({
+        address: PROTOCOL_DEPLOYMENT.lens.Bonsai as `0x${string}`,
+        abi: BONSAI_ABI,
+        functionName: "mint",
+        args: [address, parseEther("1000")],
+      });
+
+      await publicClient("lens").waitForTransactionReceipt({ hash });
+      toast.success("Successfully minted 1000 Bonsai tokens!", { id: toastId });
+    } catch (error) {
+      console.error("Error minting Bonsai:", error);
+      toast.error("Failed to mint Bonsai tokens");
+    } finally {
+      setIsMinting(false);
+    }
+  };
 
   const templatesFiltered = useMemo(() => {
     if (!categoryFilter) {
@@ -65,10 +131,26 @@ const StudioCreatePage: NextPage = () => {
             <div className="flex-grow">
               {/* Header Card */}
               <div className="bg-card rounded-lg p-6">
-                <div className="flex items-center relative">
+                <div className="flex items-center justify-between">
                   <div className="flex space-x-4">
                     <Header2>Studio</Header2>
                   </div>
+                  {isConnected && (
+                    <button
+                      onClick={handleMintBonsai}
+                      disabled={isMinting || (!!bonsaiBalance && bonsaiBalance > parseEther("1000"))}
+                      className="bg-brand-highlight text-black px-4 py-2 rounded-full hover:bg-brand-highlight/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isMinting ? (
+                        <div className="flex items-center gap-2">
+                          <Spinner customClasses="h-4 w-4" color="#ffffff" />
+                          <span>Minting...</span>
+                        </div>
+                      ) : (
+                        "Bonsai Faucet"
+                      )}
+                    </button>
+                  )}
                 </div>
                 <Subtitle className="mt-2">
                   Choose from our curated selection of templates organized by category, or import a third-party template
