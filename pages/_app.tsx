@@ -5,7 +5,7 @@ import "@styles/calendar-override.css";
 import { Analytics } from "@vercel/analytics/react";
 import NextNProgress from "nextjs-progressbar";
 import { ToastBar, Toaster } from "react-hot-toast";
-
+import HandleSEO from "@src/components/Layouts/HandleSEO";
 import { Layout } from "@src/components/Layouts/Layout";
 import { ThemeProvider } from "@src/context/ThemeContext";
 import { brandFont } from "@src/fonts/fonts";
@@ -33,6 +33,7 @@ export default function MyApp(props: AppProps) {
 
   return (
     <>
+      <HandleSEO pageProps={pageProps} />
       <Web3Provider>
         <ThemeProvider>
           <Toaster
