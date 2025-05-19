@@ -102,8 +102,9 @@ const StudioCreatePage: NextPage = () => {
 
   const checkReferralStatus = async (address: string) => {
     try {
-      const response = await axios.get(`/api/referrals/status?address=${address}`);
-      return response.data;
+      // const response = await axios.get(`/api/referrals/status?address=${address}`);
+      // return response.data;
+      return null
     } catch (error) {
       console.error('Error checking referral status:', error);
       return null;
@@ -259,8 +260,8 @@ const StudioCreatePage: NextPage = () => {
       try {
         await switchChain(walletClient, { id: LENS_CHAIN_ID });
         // HACK: require lens chain for the whole thing
-          setIsCreating(false);
-          return;
+        setIsCreating(false);
+        return;
       } catch (error) {
         console.log(error);
         toast.error("Please switch networks to create your Lens post");
@@ -529,10 +530,20 @@ const StudioCreatePage: NextPage = () => {
                     )}
                   </div>
                   <div className="lg:col-span-1">
-                    <div className="flex items-center gap-1 mb-4">
-                      <Subtitle className="text-white/70">
-                        Post preview
-                      </Subtitle>
+                    {/* Agent Behavior Examples Section */}
+                    <div className="bg-card-light p-4 rounded-lg shadow mb-6">
+                      <h3 className="text-lg font-semibold text-brand-highlight mb-3">Agent Behavior Examples</h3>
+                      <ul className="space-y-2 text-sm text-secondary/80 list-disc list-inside pl-2">
+                        <li>
+                          Identify and showcase new Lens profiles (created in the last 7 days) that are quickly gaining traction in terms of followers and early post engagement.
+                        </li>
+                        <li>
+                          Identify the top 5 most active Lens profiles (by number of posts) in the last 24 hours and provide a brief AI summary of their recent content themes.
+                        </li>
+                        <li>
+                          Track and report the top 3 most transacted tokens (by transaction count) on Lens Chain in the last 6 hours.
+                        </li>
+                      </ul>
                     </div>
                     {isGeneratingPreview && (
                       <div className="flex flex-col items-center gap-4 pt-12">
@@ -572,9 +583,9 @@ const StudioCreatePage: NextPage = () => {
                             content: preview.text || postContent,
                             video: preview.video
                               ? {
-                                  item: preview.video.url,
-                                  cover: (typeof preview.image === 'string' ? preview.image : preview.imagePreview)
-                                }
+                                item: preview.video.url,
+                                cover: (typeof preview.image === 'string' ? preview.image : preview.imagePreview)
+                              }
                               : undefined,
                             image: preview.image
                               ? { item: typeof preview.image === 'string' ? preview.image : preview.imagePreview }

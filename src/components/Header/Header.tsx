@@ -18,7 +18,7 @@ const headerLinks = [
     href: "/",
   },
   {
-    label: "Studio",
+    label: "Agent creation",
     href: "/studio",
   },
 ];

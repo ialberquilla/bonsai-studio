@@ -30,8 +30,9 @@ const connectToDatabase = async (databaseName: string) => {
     database = await mongoClient.db(databaseName);
     databases[databaseName] = database;
     return { mongoClient, database };
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error("Failed to connect to MongoDB:", e);
+    throw new Error(`Failed to connect to database: ${databaseName}. Original error: ${e.message}`);
   }
 };
 

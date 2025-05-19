@@ -147,6 +147,7 @@ const CreatePostForm = ({
         } : undefined,
       );
       if (!res) throw new Error();
+
       const { agentId, preview } = res;
 
       if (!preview) throw new Error("No preview");
@@ -444,12 +445,11 @@ const DynamicForm = ({
                   </div>
                 </div>
               ) : (
-                <input
-                  type="text"
+                <textarea
                   placeholder={placeholder}
                   value={templateData[key] || ''}
                   onChange={(e) => updateField(key, e.target.value || undefined)}
-                  className={`${sharedInputClasses} w-full p-3`}
+                  className={`${sharedInputClasses} w-full p-3 min-h-[120px]`}
                 />
               )
             ) : field instanceof z.ZodNumber && (

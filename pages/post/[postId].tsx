@@ -34,6 +34,15 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import usePostPresence from '@src/pagesComponents/Post/hooks/usePostPresence';
 import { QuotePreviews } from '@src/pagesComponents/Post/QuotePreviews';
 
+const formatDate = (timestamp: string | number | Date): string => {
+  if (!timestamp) return 'N/A';
+  try {
+    return new Date(timestamp).toLocaleString();
+  } catch (e) {
+    return 'Invalid Date';
+  }
+};
+
 interface PublicationProps {
   media: SmartMedia | null;
   rootPostId: string;
@@ -230,6 +239,31 @@ const SinglePublicationPage: NextPage<PublicationProps> = ({ media, rootPostId, 
 
     return publication?.by.id === authenticatedProfileId;
   }, [publication, authenticatedProfileId]);
+
+  const agentQuery = useMemo(() => {
+    const attributes = publication?.metadata?.attributes;
+    if (attributes && Array.isArray(attributes)) {
+      const queryAttribute = attributes.find(
+        (attr: any) => attr.key === 'query' || attr.traitType === 'query'
+      );
+      return queryAttribute?.value || 'No query available';
+    }
+    return 'No query available';
+  }, [publication]);
+
+  const lastUpdatedTimestamp = useMemo(() => {
+    if (media?.updatedAt) {
+      return formatDate(media.updatedAt * 1000); // Assuming media.updatedAt is in seconds
+    }
+    if (publication?.updatedAt) {
+      return formatDate(publication.updatedAt);
+    }
+    // Fallback if publication.timestamp is available from your PostFragmentPotentiallyDecrypted
+    if (publication?.timestamp) {
+      return formatDate(publication.timestamp);
+    }
+    return 'N/A';
+  }, [media, publication]);
 
   const enoughActivity = useMemo(() => {
     if (!sortedComments?.length || !media?.updatedAt) return false;
@@ -525,6 +559,24 @@ const SinglePublicationPage: NextPage<PublicationProps> = ({ media, rootPostId, 
                         />
                       </div>
                       <QuotePreviews quotes={quotes} />
+
+                      {/* Agent Info Section */}
+                      <div className="my-6 p-4 bg-card rounded-lg shadow">
+                        <h3 className="text-lg font-semibold text-brand-highlight mb-2">
+                          Agent Activity
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div>
+                            <strong className="text-secondary/80">Last Query Generated:</strong>
+                            <p className="text-secondary/70 break-words">{agentQuery}</p>
+                          </div>
+                          <div>
+                            <strong className="text-secondary/80">Last Post Update:</strong>
+                            <p className="text-secondary/70">{lastUpdatedTimestamp}</p>
+                          </div>
+                        </div>
+                      </div>
+
                     </>
                   ) : (
                     <div className="flex justify-center pt-8 pb-8">
