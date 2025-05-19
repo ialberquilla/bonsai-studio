@@ -1,0 +1,73 @@
+name: Production deployment
+on:
+  push:
+    branches:
+      - master
+jobs:
+  update-instance:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout client-bonsai
+      uses: actions/checkout@main
+      
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Install the gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Authenticate Docker to Google Artifact Registry
+      run: |-
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        tags: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/registry/bonsai-server-dev
+        build-args: |
+          NEXT_PUBLIC_LAUNCHPAD_CHAIN_ID=${{ secrets.NEXT_PUBLIC_LAUNCHPAD_CHAIN_ID_DEV }}
+          NEXT_PUBLIC_ALCHEMY_API_KEY=${{ secrets.NEXT_PUBLIC_ALCHEMY_API_KEY }}
+          NEXT_PUBLIC_POLYGON_RPC=${{ secrets.NEXT_PUBLIC_POLYGON_RPC }}
+          NEXT_PUBLIC_MAINNET_RPC=${{ secrets.NEXT_PUBLIC_MAINNET_RPC }}
+          NEXT_PUBLIC_ZKSYNC_RPC=${{ secrets.NEXT_PUBLIC_ZKSYNC_RPC }}
+          NEXT_PUBLIC_BASE_RPC=${{ secrets.NEXT_PUBLIC_BASE_RPC }}
+          NEXT_PUBLIC_BASE_SEPOLIA_RPC=${{ secrets.NEXT_PUBLIC_BASE_SEPOLIA_RPC }}
+          NEXT_PUBLIC_ZKSYNC_SEPOLIA_RPC=${{ secrets.NEXT_PUBLIC_ZKSYNC_SEPOLIA_RPC }}
+          NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
+          NEXT_PUBLIC_MONEY_CLUBS_SUBGRAPH_API_KEY=${{ secrets.NEXT_PUBLIC_MONEY_CLUBS_SUBGRAPH_API_KEY }}
+          NEXT_PUBLIC_JWKS_URI=${{ secrets.NEXT_PUBLIC_JWKS_URI }}
+          NEXT_PUBLIC_JWKS_URI_TESTNET=${{ secrets.NEXT_PUBLIC_JWKS_URI_TESTNET }}
+          NEXT_PUBLIC_ELIZA_API_URL=${{ secrets.NEXT_PUBLIC_ELIZA_API_URL_DEV }}
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          VENICE_API_KEY=${{ secrets.VENICE_API_KEY }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+            push: true
+            tags: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/registry/bonsai-server-prod
+            build-args: |
+              NEXT_PUBLIC_LAUNCHPAD_CHAIN_ID=${{ secrets.NEXT_PUBLIC_LAUNCHPAD_CHAIN_ID }}
+              NEXT_PUBLIC_ALCHEMY_API_KEY=${{ secrets.NEXT_PUBLIC_ALCHEMY_API_KEY }}
+              NEXT_PUBLIC_POLYGON_RPC=${{ secrets.NEXT_PUBLIC_POLYGON_RPC }}
+              NEXT_PUBLIC_MAINNET_RPC=${{ secrets.NEXT_PUBLIC_MAINNET_RPC }}
+              NEXT_PUBLIC_ZKSYNC_RPC=${{ secrets.NEXT_PUBLIC_ZKSYNC_RPC }}
+              NEXT_PUBLIC_BASE_RPC=${{ secrets.NEXT_PUBLIC_BASE_RPC }}
+              NEXT_PUBLIC_BASE_SEPOLIA_RPC=${{ secrets.NEXT_PUBLIC_BASE_SEPOLIA_RPC }}
+              NEXT_PUBLIC_ZKSYNC_SEPOLIA_RPC=${{ secrets.NEXT_PUBLIC_ZKSYNC_SEPOLIA_RPC }}
+              NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=${{ secrets.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID }}
+              NEXT_PUBLIC_MONEY_CLUBS_SUBGRAPH_API_KEY=${{ secrets.NEXT_PUBLIC_MONEY_CLUBS_SUBGRAPH_API_KEY }}
+              NEXT_PUBLIC_JWKS_URI=${{ secrets.NEXT_PUBLIC_JWKS_URI }}
+              NEXT_PUBLIC_JWKS_URI_TESTNET=${{ secrets.NEXT_PUBLIC_JWKS_URI_TESTNET }}
+              NEXT_PUBLIC_ELIZA_API_URL=${{ secrets.NEXT_PUBLIC_ELIZA_API_URL }}
+              MONGO_URI=${{ secrets.MONGO_URI }}
+              VENICE_API_KEY=${{ secrets.VENICE_API_KEY }}
+              SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+              

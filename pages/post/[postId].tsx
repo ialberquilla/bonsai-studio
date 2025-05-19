@@ -240,30 +240,55 @@ const SinglePublicationPage: NextPage<PublicationProps> = ({ media, rootPostId, 
     return publication?.by.id === authenticatedProfileId;
   }, [publication, authenticatedProfileId]);
 
-  const agentQuery = useMemo(() => {
+  const processedQueryAttributes = useMemo(() => {
     const attributes = publication?.metadata?.attributes;
-    if (attributes && Array.isArray(attributes)) {
-      const queryAttribute = attributes.find(
-        (attr: any) => attr.key === 'query' || attr.traitType === 'query'
-      );
-      return queryAttribute?.value || 'No query available';
+    if (!attributes || !Array.isArray(attributes)) {
+      return [];
     }
-    return 'No query available';
+
+    const queriesWithDates = attributes
+      .map((attr: any) => {
+        if (attr.key === 'query' || attr.traitType === 'query') {
+          if (typeof attr.value === 'string' && attr.value.includes(' #--# ')) {
+            const parts = attr.value.split(' #--# ');
+            const queryText = parts[0];
+            const timestampString = parts[1];
+            const date = new Date(timestampString);
+            if (!isNaN(date.getTime())) {
+              return { queryText, date };
+            }
+          }
+        }
+        return null;
+      })
+      .filter(item => item !== null) as { queryText: string; date: Date }[];
+
+    return queriesWithDates.sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [publication]);
 
+  const agentQuery = useMemo(() => {
+    if (processedQueryAttributes.length > 0) {
+      return processedQueryAttributes[0].queryText;
+    }
+    return 'No query available';
+  }, [processedQueryAttributes]);
+
   const lastUpdatedTimestamp = useMemo(() => {
+    if (processedQueryAttributes.length > 0) {
+      return formatDate(processedQueryAttributes[0].date);
+    }
+    // Fallback to existing logic if no new-format query attributes are found
     if (media?.updatedAt) {
       return formatDate(media.updatedAt * 1000); // Assuming media.updatedAt is in seconds
     }
     if (publication?.updatedAt) {
       return formatDate(publication.updatedAt);
     }
-    // Fallback if publication.timestamp is available from your PostFragmentPotentiallyDecrypted
     if (publication?.timestamp) {
       return formatDate(publication.timestamp);
     }
     return 'N/A';
-  }, [media, publication]);
+  }, [processedQueryAttributes, media, publication]);
 
   const enoughActivity = useMemo(() => {
     if (!sortedComments?.length || !media?.updatedAt) return false;
