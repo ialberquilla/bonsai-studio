@@ -1,16 +1,16 @@
 import clsx from "clsx";
 
 const links = [
-  { name: "Info", href: "/info" },
-  { name: "Hooks", href: "/hooks" },
-  { name: "Orb", href: "https://orb.club/c/bonsai" },
-  { name: "X / Twitter", href: "https://x.com/onbonsai" },
+  // { name: "Info", href: "/info" },
+  // { name: "Hooks", href: "/hooks" },
+  // { name: "Orb", href: "https://orb.club/c/bonsai" },
+  // { name: "X / Twitter", href: "https://x.com/onbonsai" },
   // { name: "Uni v4 hooks", href: "/hooks" },
 ];
 
 const legal = [
-  { name: "Privacy Policy", href: "/privacy-policy" },
-  { name: "Terms & Conditions", href: "/tos" },
+  // { name: "Privacy Policy", href: "/privacy-policy" },
+  // { name: "Terms & Conditions", href: "/tos" },
 ];
 
 interface FooterProps {

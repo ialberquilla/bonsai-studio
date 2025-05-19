@@ -47,7 +47,7 @@ const StudioCreatePage: NextPage = () => {
     args: [address!],
     chainId: lensTestnet.id,
     query: {
-      enabled: isConnected && address,
+      enabled: !!(isConnected && address),
       refetchInterval: 10000,
     },
   });
@@ -133,66 +133,12 @@ const StudioCreatePage: NextPage = () => {
               <div className="bg-card rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex space-x-4">
-                    <Header2>Studio</Header2>
+                    <Header2>Agent creation</Header2>
                   </div>
-                  {isConnected && (
-                    <button
-                      onClick={handleMintBonsai}
-                      disabled={isMinting || (!!bonsaiBalance && bonsaiBalance > parseEther("1000"))}
-                      className="bg-brand-highlight text-black px-4 py-2 rounded-full hover:bg-brand-highlight/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isMinting ? (
-                        <div className="flex items-center gap-2">
-                          <Spinner customClasses="h-4 w-4" color="#ffffff" />
-                          <span>Minting...</span>
-                        </div>
-                      ) : (
-                        "Bonsai Faucet"
-                      )}
-                    </button>
-                  )}
                 </div>
                 <Subtitle className="mt-2">
-                  Choose from our curated selection of templates organized by category, or import a third-party template
-                  directly from your ElizaOS server.
+                  Please note: This project is currently in beta. While we strive for perfection, occasional errors may occur, and there's a potential risk of data loss. We appreciate your understanding and feedback!
                 </Subtitle>
-              </div>
-
-              {/* Categories Card */}
-              <div className="bg-card rounded-lg p-6 mt-6">
-                <h3 className="text-sm font-medium text-brand-highlight mb-4">Categories</h3>
-                <div className="relative">
-                  <div className="bg-card-light rounded-full p-1 flex overflow-x-auto scrollbar-hide relative pr-24">
-                    {categories.map((c) => (
-                      <button
-                        key={c.label}
-                        className={`${
-                          c.key === categoryFilter
-                            ? `bg-brand-highlight text-white`
-                            : "text-secondary/60 hover:bg-card transition-colors"
-                        } px-6 py-2 rounded-full flex-shrink-0 whitespace-nowrap mr-2 ${brandFont.className}`}
-                        onClick={() => setCategoryFilter(c.key)}
-                      >
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div
-                    className={clsx(
-                      "absolute right-0 top-0 bottom-0 flex items-center bg-gradient-to-l from-card via-card to-transparent pl-10 pr-2 rounded-r-full",
-                      `${brandFont.className}`,
-                    )}
-                  >
-                    <button
-                      ref={importButtonRef}
-                      className="text-secondary/60 hover:bg-card-light transition-colors px-6 py-2 rounded-full flex-shrink-0"
-                      onClick={() => setShowImportTemplateModal(true)}
-                    >
-                      + Import
-                    </button>
-                  </div>
-                </div>
               </div>
 
               {/* Templates Card */}
