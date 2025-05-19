@@ -67,7 +67,7 @@ jobs:
               NEXT_PUBLIC_JWKS_URI=${{ secrets.NEXT_PUBLIC_JWKS_URI }}
               NEXT_PUBLIC_JWKS_URI_TESTNET=${{ secrets.NEXT_PUBLIC_JWKS_URI_TESTNET }}
               NEXT_PUBLIC_ELIZA_API_URL=${{ secrets.NEXT_PUBLIC_ELIZA_API_URL }}
-              MONGO_URI=${{ secrets.MONGO_URI }}
+              MONGO_URI=${{ secrets.MONGO_URI_PROD }}
               VENICE_API_KEY=${{ secrets.VENICE_API_KEY }}
               SESSION_SECRET=${{ secrets.SESSION_SECRET }}
               
