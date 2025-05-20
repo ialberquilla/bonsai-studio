@@ -87,6 +87,11 @@ export const getAllPosts = async (cursor?: Cursor | null) => {
   return await fetchPosts(sessionClient || lensClient, {
     filter: {
       postTypes: [PostType.Root],
+      metadata: {
+        tags: {
+          oneOf: ['collectivai']
+        }
+      },
       feeds: [{ feed: evmAddress(LENS_BONSAI_DEFAULT_FEED) }]
     },
     pageSize: PageSize.Ten,
