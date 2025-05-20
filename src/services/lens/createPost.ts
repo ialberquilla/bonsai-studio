@@ -201,6 +201,7 @@ export const formatMetadata = (params: PostParams): TextOnlyMetadata | ImageMeta
 
 export const uploadMetadata = async (params: PostParams): Promise<URI> => {
   const metadata = formatMetadata(params);
+
   const acl = params.template?.acl || immutable(LENS_CHAIN_ID);
   const { uri: hash } = await storageClient.uploadAsJson(metadata, { acl });
   return uri(hash);

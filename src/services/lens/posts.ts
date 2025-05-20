@@ -78,6 +78,23 @@ export const getPostsByAuthor = async (authorId: string, cursor?: Cursor | null)
   });
 };
 
+
+export const getAllPosts = async (cursor?: Cursor | null) => {
+  let sessionClient;
+  try {
+    sessionClient = await resumeSession();
+  } catch { }
+  return await fetchPosts(sessionClient || lensClient, {
+    filter: {
+      postTypes: [PostType.Root],
+      feeds: [{ feed: evmAddress(LENS_BONSAI_DEFAULT_FEED) }]
+    },
+    pageSize: PageSize.Ten,
+    cursor
+  });
+};
+
+
 export const getPostsCollectedBy = async (authorId: string, cursor?: Cursor | null) => {
   let sessionClient;
   try {

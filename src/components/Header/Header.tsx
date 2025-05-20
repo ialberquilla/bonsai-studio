@@ -12,23 +12,34 @@ import useIsMounted from "@src/hooks/useIsMounted";
 import { Button } from "../Button";
 import { Balance } from "./Balance";
 
-const headerLinks = [
-  {
-    label: "Your Posts",
-    href: "/",
-  },
-  {
-    label: "Agent creation",
-    href: "/studio",
-  },
-];
-
 export const Header = () => {
   const { route } = useRouter();
   const { data: walletClient } = useWalletClient();
   const { openSignInModal, setOpenSignInModal, isAuthenticated, authenticatedProfile } = useLensSignIn(walletClient);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const isMounted = useIsMounted();
+
+  const baseHeaderLinks = [
+    {
+      label: "Feed",
+      href: "/",
+    },
+    {
+      label: "Agent creation",
+      href: "/studio",
+    },
+  ];
+
+  const authenticatedHeaderLinks = isAuthenticated
+    ? [
+        {
+          label: "Your Posts",
+          href: "/my-posts",
+        },
+      ]
+    : [];
+
+  const headerLinks = [...baseHeaderLinks.slice(0,1), ...authenticatedHeaderLinks, ...baseHeaderLinks.slice(1)];
 
   if (!isMounted) return null;
 

@@ -1,33 +1,59 @@
 import { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useWalletClient } from "wagmi";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getPostsByAuthor, getAllPosts } from "@src/services/lens/posts";
+import { getPostsByAuthor } from "@src/services/lens/posts";
 import useLensSignIn from "@src/hooks/useLensSignIn";
 import { getProfileImage } from "@src/services/lens/utils";
 import Link from "next/link";
 import { Cursor } from "@lens-protocol/client";
+import { useEffect } from "react";
 
-const IndexPage: NextPage = () => {
+const MyPostsPage: NextPage = () => {
+  const router = useRouter();
   const { data: walletClient } = useWalletClient();
-  const { isAuthenticated } = useLensSignIn(walletClient);
+  const { isAuthenticated, authenticatedProfileId } = useLensSignIn(walletClient);
+
+  useEffect(() => {
+    // If not authenticated and authenticatedProfileId is not available (after hooks have run)
+    // Redirect to home or show a login prompt.
+    // Add a slight delay or check loading state of useLensSignIn if it has one,
+    // to prevent redirecting before authentication status is confirmed.
+    if (!authenticatedProfileId && !isAuthenticated) { // A more robust check might be needed depending on useLensSignIn behavior
+      // router.push("/\"); // Option 1: Redirect to feed
+      // Or show a message directly on this page
+    }
+  }, [isAuthenticated, authenticatedProfileId, router]);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery<any, Error, { pages: { items: any[], pageInfo: { next: Cursor | null } }[], pageParams: any[] }>({
-    queryKey: ["feed-posts"],
+    queryKey: ["my-posts", authenticatedProfileId],
     // @ts-ignore
     queryFn: async ({ pageParam }) => {
-      const result = await getAllPosts(pageParam as Cursor | null);
-      console.log("result from getAllPosts for feed", result);
+      if (!authenticatedProfileId) {
+        return { items: [], pageInfo: { next: null } }; // Should not fetch if no profile ID
+      }
+      const result = await getPostsByAuthor(authenticatedProfileId, pageParam as Cursor | null);
       return result.isOk() ? result.value : { items: [], pageInfo: { next: null } };
     },
     getNextPageParam: (lastPage) => lastPage?.pageInfo?.next,
-    enabled: true,
+    enabled: !!authenticatedProfileId, // Only run query if user is authenticated and profile ID is available
     initialPageParam: null as Cursor | null,
   });
+
+  if (!isAuthenticated || !authenticatedProfileId) {
+    return (
+      <div className="min-h-screen bg-background text-white p-8 flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="text-gray-400">Please log in to view your publications.</p>
+        {/* Optionally, add a Link to the login page or a connect button */}
+      </div>
+    );
+  }
 
   if (status === "pending" && (!data || !data.pages || data.pages.length === 0)) {
     return (
       <div className="min-h-screen bg-background text-white p-8 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Loading Feed...</h1>
+        <h1 className="text-2xl font-bold mb-4">Loading Your Publications...</h1>
       </div>
     );
   }
@@ -36,7 +62,7 @@ const IndexPage: NextPage = () => {
     return (
       <div className="min-h-screen bg-background text-white p-8 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Error</h1>
-        <p className="text-red-400">Failed to load feed. Please try again later.</p>
+        <p className="text-red-400">Failed to load your publications. Please try again later.</p>
       </div>
     );
   }
@@ -46,15 +72,16 @@ const IndexPage: NextPage = () => {
   if (noPostsFound) {
     return (
       <div className="min-h-screen bg-background text-white p-8 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Feed</h1>
-        <p className="text-gray-400">No publications found in the feed right now. Try again later or create a post!</p>
+        <h1 className="text-2xl font-bold mb-4">Your Publications</h1>
+        <p className="text-gray-400">You haven't created any publications yet.</p>
+        {/* Optionally, Link to creation page */}
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-background text-white p-8 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-8">Feed</h1>
+      <h1 className="text-2xl font-bold mb-8">Your Publications</h1>
 
       <div className="space-y-6">
         {data?.pages.map((page, i) => (
@@ -119,4 +146,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage;
+export default MyPostsPage; 
